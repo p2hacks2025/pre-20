@@ -1,18 +1,20 @@
+import type { MinoType } from "../constants/config";
+
 export interface GameState {
     gameState: number;
     grid: number[][];
-    colorGrid: number[][];
+    colorGrid: string[][];
 
     // 操作ブロック
     currentShape: number[][];
-    currentColorIndex: number;
+    currentMinoType: MinoType;
     currentX: number;
     currentY: number;
     currentBlockTypes: number[];
 
     // 次のブロック
     nextShape: number[][];
-    nextColorIndex: number;
+    nextMinoType: MinoType;
     nextBlockTypes: number[];
 
     // ステータス

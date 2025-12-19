@@ -1,6 +1,6 @@
 import p5 from 'p5';
 import type { GameState } from '../types';
-import { COLS, ROWS, BLOCK_SIZE, SHAPE_COLORS, TYPE, STATE, UI_WIDTH, BTN_LAYOUT } from '../constants/config';
+import { COLS, ROWS, BLOCK_SIZE, TYPE, STATE, UI_WIDTH, BTN_LAYOUT, MINO_COLORS } from '../constants/config';
 import { canMove, isRowFull, rowHasGold, rowHasPlatinum } from '../core/logic';
 
 // ボタン位置初期化
@@ -10,7 +10,7 @@ export const initButtonPositions = (p: p5): void => {
 };
 
 // 単体ブロック描画
-const drawSingleBlock = (p: p5, x: number, y: number, type: number, cIndex: number): void => {
+const drawSingleBlock = (p: p5, x: number, y: number, type: number, colorArg: string): void => {
     if (type === TYPE.GOLD) {
         p.fill(255, 215, 0); p.stroke(255, 255, 200);
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
@@ -24,7 +24,7 @@ const drawSingleBlock = (p: p5, x: number, y: number, type: number, cIndex: numb
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
         p.fill(50); p.ellipse(x + 15, y + 15, 10, 10);
     } else {
-        p.fill(SHAPE_COLORS[cIndex % SHAPE_COLORS.length]); p.stroke(0);
+        p.fill(colorArg); p.stroke(0);
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
     }
 };
@@ -46,12 +46,14 @@ export const drawGrid = (p: p5, state: GameState): void => {
 
 // 操作ブロック描画
 export const drawCurrentPiece = (p: p5, state: GameState): void => {
+    const colorCode = MINO_COLORS[state.currentMinoType];
     let counter = 0;
+
     state.currentShape.forEach((row, i) => {
         row.forEach((cell, j) => {
             if (cell !== 0 && counter < 4) {
                 const type = state.currentBlockTypes[counter];
-                drawSingleBlock(p, (state.currentX + j) * BLOCK_SIZE, (state.currentY + i) * BLOCK_SIZE, type, state.currentColorIndex);
+                drawSingleBlock(p, (state.currentX + j) * BLOCK_SIZE, (state.currentY + i) * BLOCK_SIZE, type, colorCode);
                 counter++;
             }
         });
@@ -61,6 +63,7 @@ export const drawCurrentPiece = (p: p5, state: GameState): void => {
 // ゴースト描画
 export const drawGhost = (p: p5, state: GameState): void => {
     let ghostY = state.currentY;
+
     while (canMove(state, state.currentX, ghostY + 1, state.currentShape)) ghostY++;
 
     p.noFill();
@@ -83,11 +86,13 @@ export const drawUI = (p: p5, state: GameState): void => {
     p.textSize(20);
     p.text("NEXT", 20, 20);
 
+    const nextColor = MINO_COLORS[state.nextMinoType];
     let counter = 0;
+
     state.nextShape.forEach((row, i) => {
         row.forEach((cell, j) => {
             if (cell !== 0 && counter < 4) {
-                drawSingleBlock(p, 20 + j * BLOCK_SIZE, 50 + i * BLOCK_SIZE, state.nextBlockTypes[counter], state.nextColorIndex);
+                drawSingleBlock(p, 20 + j * BLOCK_SIZE, 50 + i * BLOCK_SIZE, state.nextBlockTypes[counter], nextColor);
                 counter++;
             }
         });

@@ -1,11 +1,13 @@
-import { COLS, ROWS, SHAPES, TYPE, STATE } from '../constants/config';
+import { COLS, ROWS, TYPE, STATE, MINO_SHAPES, type MinoType, MINO_COLORS } from '../constants/config';
 import type { GameState } from '../types';
 
-// 次のピースを生成
+// 次のブロックを生成
 export const generateNextPiece = (state: GameState): void => {
-    const r = Math.floor(Math.random() * SHAPES.length);
-    state.nextShape = SHAPES[r];
-    state.nextColorIndex = r;
+    const keys = Object.keys(MINO_SHAPES) as MinoType[];
+    const r = keys[Math.floor(Math.random() * keys.length)];
+
+    state.nextMinoType = r;
+    state.nextShape = MINO_SHAPES[r];
 
     let counter = 0;
     state.nextShape.forEach(row => {
@@ -39,9 +41,10 @@ export const canMove = (state: GameState, newX: number, newY: number, shape: num
 // スポーン処理
 export const spawnPiece = (state: GameState): void => {
     state.currentShape = state.nextShape;
-    state.currentColorIndex = state.nextColorIndex;
+    state.currentMinoType = state.nextMinoType;
     state.currentBlockTypes = [...state.nextBlockTypes];
 
+    //初期位置計算
     state.currentX = Math.floor(COLS / 2) - Math.floor(state.currentShape[0].length / 2);
     state.currentY = 0;
 
@@ -71,7 +74,9 @@ export const rotateShape = (state: GameState): void => {
 
 // 固定処理
 export const lockPiece = (state: GameState): void => {
+    const colorCode = MINO_COLORS[state.currentMinoType];
     let counter = 0;
+
     state.currentShape.forEach((row, i) => {
         row.forEach((cell, j) => {
             if (cell !== 0 && counter < 4) {
@@ -79,7 +84,7 @@ export const lockPiece = (state: GameState): void => {
                 const y = state.currentY + i;
                 if (y >= 0) {
                     state.grid[y][x] = state.currentBlockTypes[counter];
-                    state.colorGrid[y][x] = state.currentColorIndex;
+                    state.colorGrid[y][x] = colorCode;
                 }
                 counter++;
             }
@@ -90,7 +95,7 @@ export const lockPiece = (state: GameState): void => {
 // 重力落下（ドリル後などの詰め処理）
 export const applyGravityCascade = (state: GameState): void => {
     for (let x = 0; x < COLS; x++) {
-        const activeBlocks: { t: number, c: number }[] = [];
+        const activeBlocks: { t: number, c: string }[] = [];
         for (let y = 0; y < ROWS; y++) {
             if (state.grid[y][x] !== 0) {
                 activeBlocks.push({ t: state.grid[y][x], c: state.colorGrid[y][x] });
@@ -99,7 +104,7 @@ export const applyGravityCascade = (state: GameState): void => {
         // 列をクリア
         for (let y = 0; y < ROWS; y++) {
             state.grid[y][x] = 0;
-            state.colorGrid[y][x] = 0;
+            state.colorGrid[y][x] = '';
         }
         // 下から詰める
         let pos = ROWS - 1;
