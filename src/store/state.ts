@@ -1,5 +1,5 @@
 import { COLS, ROWS, STATE, SHAPES, TYPE } from '../constants/config';
-import { GameState } from '../types';
+import type { GameState } from '../types';
 
 export const createInitialState = (): GameState => ({
   gameState: STATE.TITLE,

@@ -1,5 +1,5 @@
 import p5 from 'p5';
-import { GameState } from '../types';
+import type { GameState } from '../types';
 import { COLS, ROWS, BLOCK_SIZE, SHAPE_COLORS, TYPE, STATE, UI_WIDTH, BTN_LAYOUT } from '../constants/config';
 import { canMove, isRowFull, rowHasGold, rowHasPlatinum } from '../core/logic';
 
@@ -112,7 +112,7 @@ const drawButtons = (p: p5, state: GameState): void => {
     p.textAlign(p.CENTER, p.CENTER);
 
     // Drill
-    p.fill(state.gameState === STATE.DRILL ? p.color(200, 50, 50) : 100);
+    p.fill(state.gameState === STATE.DRILL ? p.color(200, 50, 50) : p.color(100));
     p.stroke(255);
     p.rect(BTN_LAYOUT.DRILL.x, BTN_LAYOUT.DRILL.y, BTN_LAYOUT.DRILL.w, BTN_LAYOUT.DRILL.h, 10);
     p.fill(255); p.textSize(20);

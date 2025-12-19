@@ -1,5 +1,5 @@
 import { COLS, ROWS, SHAPES, TYPE, STATE } from '../constants/config';
-import { GameState } from '../types';
+import type { GameState } from '../types';
 
 // 次のピースを生成
 export const generateNextPiece = (state: GameState): void => {
