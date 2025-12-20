@@ -1,6 +1,5 @@
 import type { MinoType } from "./constants/config";
 
-// p5用の画像アセットはほぼ不要になりましたが、パーティクル等で使う可能性があるので残します
 export interface GameAssets {
     bg: any;
     frame: any;

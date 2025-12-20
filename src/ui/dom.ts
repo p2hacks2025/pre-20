@@ -1,5 +1,5 @@
 import type { GameState } from '../types';
-import { MINO_SHAPES, MINO_COLORS, TYPE, STATE } from '../constants/config';
+import { MINO_SHAPES, MINO_COLORS, STATE } from '../constants/config';
 
 // DOM要素の参照をキャッシュ
 const els = {
@@ -31,7 +31,12 @@ const els = {
 // ブロック描画ヘルパー
 const renderMinoToHTML = (container: HTMLElement, shape: number[][], color: string, blockTypes: number[]) => {
     container.innerHTML = '';
-    let counter = 0;
+
+    const width = shape[0].length;
+    const height = shape.length;
+
+    container.style.gridTemplateColumns = `repeat(${width}, 1fr)`;
+    container.style.gridTemplateRows = `repeat(${height}, 1fr)`;
 
     shape.forEach((row) => {
         row.forEach((cell) => {
@@ -39,21 +44,8 @@ const renderMinoToHTML = (container: HTMLElement, shape: number[][], color: stri
             div.className = 'w-full h-full rounded-[2px] shadow-sm';
 
             if (cell !== 0) {
-                const type = blockTypes[counter];
-                if (type === TYPE.GOLD) {
-                    div.style.background = 'linear-gradient(135deg, #ffd700, #b8860b)';
-                    div.style.border = '1px solid #ffffc8';
-                } else if (type === TYPE.PLATINUM) {
-                    div.style.background = 'linear-gradient(135deg, #e0e0e0, #a0a0a0)';
-                    div.style.border = '1px solid #ffffff';
-                } else if (type === TYPE.JANK) {
-                    div.style.backgroundColor = '#505050';
-                    div.style.border = '1px solid #303030';
-                } else {
-                    div.style.backgroundColor = color;
-                    div.style.border = '1px solid rgba(255,255,255,0.4)';
-                }
-                counter++;
+                div.style.backgroundColor = color;
+                div.style.border = '1px solid rgba(255,255,255,0.4)';
             } else {
                 div.style.backgroundColor = 'transparent';
             }
