@@ -1,6 +1,23 @@
 import { COLS, ROWS, TYPE, STATE, MINO_SHAPES, type MinoType, MINO_COLORS } from '../constants/config';
 import type { GameState } from '../types';
 
+// ブロック回転の計算
+const getRotatedShape = (shape: number[][]): number[][] => {
+    const h = shape.length;
+    const w = shape[0].length;
+
+    // 幅と高さを入れ替え
+    const rotated = Array.from({ length: w }, () => Array(h).fill(0));
+
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            rotated[x][h - 1 - y] = shape[y][x];
+        }
+    }
+
+    return rotated;
+};
+
 // 次のブロックを生成
 export const generateNextPiece = (state: GameState): void => {
     const keys = Object.keys(MINO_SHAPES) as MinoType[];
@@ -57,17 +74,15 @@ export const spawnPiece = (state: GameState): void => {
 
 // 回転処理
 export const rotateShape = (state: GameState): void => {
-    const h = state.currentShape.length;
-    const w = state.currentShape[0].length;
-    const rotated = Array.from({ length: w }, () => Array(h).fill(0));
-
-    for (let i = 0; i < h; i++) {
-        for (let j = 0; j < w; j++) {
-            rotated[j][h - 1 - i] = state.currentShape[i][j];
-        }
-    }
+    const rotated = getRotatedShape(state.currentShape);
 
     if (canMove(state, state.currentX, state.currentY, rotated)) {
+        state.currentShape = rotated;
+    } else if (canMove(state, state.currentX + 1, state.currentY, rotated)) {
+        state.currentX += 1;
+        state.currentShape = rotated;
+    } else if (canMove(state, state.currentX - 1, state.currentY, rotated)) {
+        state.currentX -= 1;
         state.currentShape = rotated;
     }
 };
