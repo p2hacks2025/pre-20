@@ -61,6 +61,8 @@ export const spawnPiece = (state: GameState): void => {
     state.currentMinoType = state.nextMinoType;
     state.currentBlockTypes = [...state.nextBlockTypes];
 
+    state.canHold = true;
+
     //初期位置計算
     state.currentX = Math.floor(COLS / 2) - Math.floor(state.currentShape[0].length / 2);
     state.currentY = 0;
@@ -129,6 +131,35 @@ export const applyGravityCascade = (state: GameState): void => {
             pos--;
         }
     }
+};
+
+// ホールド機能
+export const holdPiece = (state: GameState): void => {
+    if (!state.canHold) return;
+
+    const currentMino = state.currentMinoType;
+    const currentBlocks = [...state.currentBlockTypes];
+
+    if (state.holdMinoType === null) {
+        state.holdMinoType = currentMino;
+        state.holdBlockTypes = currentBlocks;
+
+        spawnPiece(state);
+    } else {
+        const heldMino = state.holdMinoType;
+        const heldBlocks = [...state.holdBlockTypes];
+
+        state.holdMinoType = currentMino;
+        state.holdBlockTypes = currentBlocks;
+
+        state.currentMinoType = heldMino;
+        state.currentShape = MINO_SHAPES[heldMino];
+        state.currentBlockTypes = heldBlocks;
+
+        state.currentX = Math.floor(COLS / 2) - Math.floor(state.currentShape[0].length / 2);
+        state.currentY = 0;
+    }
+    state.canHold = false;
 };
 
 // ドリル機能

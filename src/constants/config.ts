@@ -1,8 +1,11 @@
 export const COLS = 10;
 export const ROWS = 20;
 export const BLOCK_SIZE = 30;
+
+export const LEFT_UI_WIDTH = 150;
 export const UI_WIDTH = 250;
-export const WINDOW_W = COLS * BLOCK_SIZE + UI_WIDTH;
+
+export const WINDOW_W = LEFT_UI_WIDTH + (COLS * BLOCK_SIZE) + UI_WIDTH;
 export const WINDOW_H = ROWS * BLOCK_SIZE;
 
 // ブロックタイプ

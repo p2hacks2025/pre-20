@@ -1,8 +1,8 @@
 import p5 from 'p5';
-import { WINDOW_W, WINDOW_H, COLS, BLOCK_SIZE, ROWS, STATE, BTN_LAYOUT } from './constants/config';
+import { WINDOW_W, WINDOW_H, COLS, BLOCK_SIZE, ROWS, STATE, BTN_LAYOUT, LEFT_UI_WIDTH } from './constants/config';
 import { createInitialState, resetGame } from './store/state';
-import { spawnPiece, canMove, rotateShape, lockPiece, generateNextPiece, useDrill, rowHasGold, useTNT, isRowFull } from './core/logic';
-import { initButtonPositions, drawTitle, drawGrid, drawGhost, drawCurrentPiece, drawDrillOverlay, drawTNTOverlay, drawGameOver, drawUI } from './ui/render';
+import { spawnPiece, canMove, rotateShape, lockPiece, generateNextPiece, useDrill, rowHasGold, useTNT, isRowFull, holdPiece } from './core/logic';
+import { initButtonPositions, drawTitle, drawGrid, drawGhost, drawCurrentPiece, drawDrillOverlay, drawTNTOverlay, drawGameOver, drawUI, drawHold } from './ui/render';
 
 const sketch = (p: p5) => {
 	const state = createInitialState();
@@ -30,7 +30,13 @@ const sketch = (p: p5) => {
 			}
 		}
 
+		drawHold(p, state);
+
+		p.push();
+		p.translate(LEFT_UI_WIDTH, 0);
+
 		p.stroke(100);
+		p.line(0, 0, 0, p.height);
 		p.line(COLS * BLOCK_SIZE, 0, COLS * BLOCK_SIZE, p.height);
 
 		drawGrid(p, state);
@@ -46,6 +52,8 @@ const sketch = (p: p5) => {
 		} else if (state.gameState === STATE.GAMEOVER) {
 			drawGameOver(p, state);
 		}
+
+		p.pop();
 
 		if (state.gameState !== STATE.GAMEOVER) {
 			drawUI(p, state);
@@ -123,6 +131,9 @@ const sketch = (p: p5) => {
 			case ' ':
 				executeHardDrop();
 				break;
+			case 'Shift':
+				holdPiece(state);
+				break;
 		}
 	};
 
@@ -133,19 +144,14 @@ const sketch = (p: p5) => {
 		}
 		else if (p.mouseX >= BTN_LAYOUT.MONEY.x && p.mouseX <= BTN_LAYOUT.MONEY.x + BTN_LAYOUT.MONEY.w &&
 			p.mouseY >= BTN_LAYOUT.MONEY.y && p.mouseY <= BTN_LAYOUT.MONEY.y + BTN_LAYOUT.MONEY.h) {
-			if (state.money >= 1000) {
-				state.money -= 1000;
-				state.tntAmmo = 3;
-				state.gameState = STATE.TNT;
-			}
-			else if (state.money >= 100) {
-				state.money -= 100;
-				state.drillUses += 3;
-			}
+			if (state.money >= 1000) { state.money -= 1000; state.tntAmmo = 3; state.gameState = STATE.TNT; }
+			else if (state.money >= 100) { state.money -= 100; state.drillUses += 3; }
 		}
 
+		const gridMouseX = p.mouseX - LEFT_UI_WIDTH;
 		const my = Math.floor(p.mouseY / BLOCK_SIZE);
-		if (p.mouseX < COLS * BLOCK_SIZE && my >= 0 && my < ROWS && isRowFull(state, my)) {
+
+		if (gridMouseX >= 0 && gridMouseX < COLS * BLOCK_SIZE && my >= 0 && my < ROWS && isRowFull(state, my)) {
 			if (state.gameState === STATE.DRILL) useDrill(state, my);
 			else if (state.gameState === STATE.TNT && !rowHasGold(state, my)) useTNT(state, my);
 		}

@@ -12,6 +12,10 @@ export const createInitialState = (): GameState => ({
     currentY: 0,
     currentBlockTypes: Array(4).fill(TYPE.NORMAL),
 
+    holdMinoType: null,
+    holdBlockTypes: [],
+    canHold: true,
+
     nextShape: MINO_SHAPES['T'],
     nextMinoType: 'T',
     nextBlockTypes: Array(4).fill(TYPE.NORMAL),
@@ -30,6 +34,11 @@ export const createInitialState = (): GameState => ({
 export const resetGame = (state: GameState, currentFrame: number): void => {
     state.grid = Array.from({ length: ROWS }, () => Array(COLS).fill(TYPE.EMPTY));
     state.colorGrid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+
+    state.holdMinoType = null;
+    state.holdBlockTypes = [];
+    state.canHold = true;
+
     state.score = 0;
     state.money = 0;
     state.drillUses = 5;
