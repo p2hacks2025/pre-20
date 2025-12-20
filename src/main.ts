@@ -66,17 +66,63 @@ const sketch = (p: p5) => {
 		}
 	};
 
+	// 移動関数
+	const tryMove = (dx: number, dy: number): boolean => {
+		if (canMove(state, state.currentX + dx, state.currentY + dy, state.currentShape)) {
+			state.currentX += dx;
+			state.currentY += dy;
+			return true;
+		}
+		return false;
+	};
+
+	// ハードドロップ
+	const executeHardDrop = () => {
+		while (tryMove(0, 1)) {
+			// 地面につくまで
+		}
+		lockPiece(state);
+		spawnPiece(state);
+	};
+
+	// ゲーム開始処理
+	const startGame = () => {
+		resetGame(state, p.frameCount);
+		spawnPiece(state);
+	};
+
 	p.keyPressed = () => {
-		if (state.gameState === STATE.TITLE && p.key === ' ') {
-			resetGame(state, p.frameCount);
-			spawnPiece(state);
-		} else if (state.gameState === STATE.GAMEOVER && p.key === p.ENTER) {
-			state.gameState = STATE.TITLE;
-		} else if (state.gameState === STATE.PLAY) {
-			if (p.key === 'ArrowLeft' && canMove(state, state.currentX - 1, state.currentY, state.currentShape)) state.currentX--;
-			else if (p.key === 'ArrowRight' && canMove(state, state.currentX + 1, state.currentY, state.currentShape)) state.currentX++;
-			else if (p.key === 'ArrowDown' && canMove(state, state.currentX, state.currentY + 1, state.currentShape)) state.currentY++;
-			else if (p.key === 'ArrowUp') rotateShape(state);
+		switch (state.gameState) {
+			case STATE.TITLE:
+				if (p.key === 'Enter') startGame();
+				break;
+			case STATE.GAMEOVER:
+				if (p.key === 'Enter') state.gameState = STATE.TITLE;
+				break;
+			case STATE.PLAY:
+				handlePlayInput();
+				break;
+		}
+	};
+
+	// プレイ中の入力処理を分離
+	const handlePlayInput = () => {
+		switch (p.key) {
+			case 'ArrowLeft':
+				tryMove(-1, 0);
+				break;
+			case 'ArrowRight':
+				tryMove(1, 0);
+				break;
+			case 'ArrowDown':
+				tryMove(0, 1);
+				break;
+			case 'ArrowUp':
+				rotateShape(state);
+				break;
+			case ' ':
+				executeHardDrop();
+				break;
 		}
 	};
 

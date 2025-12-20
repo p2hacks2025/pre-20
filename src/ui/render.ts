@@ -12,19 +12,26 @@ export const initButtonPositions = (p: p5): void => {
 // 単体ブロック描画
 const drawSingleBlock = (p: p5, x: number, y: number, type: number, colorArg: string): void => {
     if (type === TYPE.GOLD) {
-        p.fill(255, 215, 0); p.stroke(255, 255, 200);
+        p.fill(255, 215, 0);
+        p.stroke(255, 255, 200);
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-        p.fill(255, 255, 200); p.rect(x + 5, y + 5, 5, 5);
+        p.fill(255, 255, 200);
+        p.rect(x + 5, y + 5, 5, 5);
     } else if (type === TYPE.PLATINUM) {
-        p.fill(192, 192, 192); p.stroke(255);
+        p.fill(192, 192, 192);
+        p.stroke(255);
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-        p.fill(255); p.triangle(x, y, x + 10, y, x, y + 10);
+        p.fill(255);
+        p.triangle(x, y, x + 10, y, x, y + 10);
     } else if (type === TYPE.JANK) {
-        p.fill(105, 123, 124); p.stroke(255);
+        p.fill(105, 123, 124);
+        p.stroke(255);
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
-        p.fill(50); p.ellipse(x + 15, y + 15, 10, 10);
+        p.fill(50);
+        p.ellipse(x + 15, y + 15, 10, 10);
     } else {
-        p.fill(colorArg); p.stroke(0);
+        p.fill(colorArg);
+        p.stroke(0);
         p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
     }
 };
@@ -99,16 +106,20 @@ export const drawUI = (p: p5, state: GameState): void => {
     });
 
     const statY = 180;
-    p.fill(255); p.text(`SCORE: ${state.score}`, 20, statY);
-    p.fill('#FFFF00'); p.text(`MONEY: ${state.money} YEN`, 20, statY + 30);
-    p.fill('#00FF00'); p.text(`DRILL: ${state.drillUses} Left`, 20, statY + 60);
+    p.fill(255);
+    p.text(`SCORE: ${state.score}`, 20, statY);
+    p.fill('#FFFF00');
+    p.text(`MONEY: ${state.money} YEN`, 20, statY + 30);
+    p.fill('#00FF00');
+    p.text(`DRILL: ${state.drillUses} Left`, 20, statY + 60);
     p.pop();
 
     drawButtons(p, state);
 
     const elapsedSec = Math.floor((p.frameCount - state.gameStartFrame) / 60);
     const remainingSec = Math.max(0, state.timeLimitSec - elapsedSec);
-    p.fill(255); p.textAlign(p.LEFT);
+    p.fill(255);
+    p.textAlign(p.LEFT);
     p.text(`TIME: ${remainingSec}s`, p.width - UI_WIDTH + 90, BTN_LAYOUT.DRILL.y - 20);
 };
 
@@ -120,7 +131,8 @@ const drawButtons = (p: p5, state: GameState): void => {
     p.fill(state.gameState === STATE.DRILL ? p.color(200, 50, 50) : p.color(100));
     p.stroke(255);
     p.rect(BTN_LAYOUT.DRILL.x, BTN_LAYOUT.DRILL.y, BTN_LAYOUT.DRILL.w, BTN_LAYOUT.DRILL.h, 10);
-    p.fill(255); p.textSize(20);
+    p.fill(255);
+    p.textSize(20);
     p.text("ACTIVATE DRILL", BTN_LAYOUT.DRILL.x + BTN_LAYOUT.DRILL.w / 2, BTN_LAYOUT.DRILL.y + BTN_LAYOUT.DRILL.h / 2);
 
     // Money
@@ -144,7 +156,8 @@ export const drawDrillOverlay = (p: p5, state: GameState): void => {
     if (p.mouseX < COLS * BLOCK_SIZE && my >= 0 && my < ROWS && isRowFull(state, my)) {
         p.fill(255, 0, 0, 100);
         p.rect(0, my * BLOCK_SIZE, COLS * BLOCK_SIZE, BLOCK_SIZE);
-        p.fill(255); p.textAlign(p.CENTER);
+        p.fill(255);
+        p.textAlign(p.CENTER);
         p.text(rowHasPlatinum(state, my) ? "PLATINUM BLAST!" : "DRILL GOLD", COLS * BLOCK_SIZE / 2, my * BLOCK_SIZE + 20);
     }
 };
@@ -155,7 +168,8 @@ export const drawTNTOverlay = (p: p5, state: GameState): void => {
         if (!rowHasGold(state, my)) {
             p.fill(255, 140, 0, 150);
             p.rect(0, my * BLOCK_SIZE, COLS * BLOCK_SIZE, BLOCK_SIZE);
-            p.fill(255); p.textAlign(p.CENTER);
+            p.fill(255);
+            p.textAlign(p.CENTER);
             p.text("TNT EXPLOSION", COLS * BLOCK_SIZE / 2, my * BLOCK_SIZE + 20);
         }
     }
