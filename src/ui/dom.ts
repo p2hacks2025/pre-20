@@ -16,6 +16,16 @@ const els = {
     next: document.getElementById('ui-next')!,
     btnShopDrill: document.getElementById('btn-shop-drill')!,
     btnShopTnt: document.getElementById('btn-shop-tnt')!,
+
+    // タイトル画面
+    titleScreen: document.getElementById('ui-title')!,
+    btnStart: document.getElementById('btn-start')!,
+
+    // ゲームオーバー画面
+    gameoverScreen: document.getElementById('ui-gameover')!,
+    goMessage: document.getElementById('go-message')!,
+    goScore: document.getElementById('go-score')!,
+    btnRetry: document.getElementById('btn-retry')!,
 };
 
 // ブロック描画ヘルパー
@@ -53,15 +63,55 @@ const renderMinoToHTML = (container: HTMLElement, shape: number[][], color: stri
 };
 
 export const updateDOM = (state: GameState, currentFrame: number) => {
+    // ゲームスタート
+    if (state.gameState === STATE.TITLE) {
+        els.titleScreen.classList.remove('hidden');
+        els.titleScreen.classList.remove('opacity-0');
+    } else {
+        els.titleScreen.classList.add('hidden');
+    }
+
+    // ゲームオーバー・クリア
+    if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
+        els.gameoverScreen.classList.remove('hidden');
+
+        // メッセージと色を出し分け
+        if (state.gameCleared) {
+            els.goMessage.innerHTML = "NIGHT<br>CLEAR!";
+            els.goMessage.className = "text-4xl font-black italic tracking-tighter mb-4 drop-shadow-lg text-center leading-tight text-transparent bg-clip-text bg-gradient-to-br from-cyan-300 to-blue-500";
+        } else {
+            els.goMessage.innerHTML = "GAME<br>OVER";
+            els.goMessage.className = "text-4xl font-black italic tracking-tighter mb-4 drop-shadow-lg text-center leading-tight text-red-600";
+        }
+
+        // 最終スコアを表示
+        els.goScore.textContent = state.score.toString();
+    } else {
+        els.gameoverScreen.classList.add('hidden');
+    }
+
     // スコア・お金・時間
     els.score.textContent = state.score.toString();
     els.money.textContent = state.money.toString();
 
     const elapsedSec = Math.floor((currentFrame - state.gameStartFrame) / 60);
-    const remainingSec = Math.max(0, state.timeLimitSec - elapsedSec);
-    els.time.textContent = remainingSec.toString();
-    if (remainingSec <= 10) els.time.classList.add('text-red-500');
-    else els.time.classList.remove('text-red-500');
+    const rawRemainingSec = state.timeLimitSec - elapsedSec;
+
+    // ゲームオーバー・クリア以外（プレイ中・タイトル）は常に時間を更新
+    if (state.gameState !== STATE.GAMEOVER && !state.gameCleared) {
+        const displaySec = Math.max(0, rawRemainingSec);
+        els.time.textContent = displaySec.toString();
+
+        if (displaySec <= 10) els.time.classList.add('text-red-500');
+        else els.time.classList.remove('text-red-500');
+    } else {
+        // ゲーム終了時
+        // タイムアップで終わった場合は、0を表示する
+        if (rawRemainingSec <= 0) {
+            els.time.textContent = "0";
+            els.time.classList.add('text-red-500');
+        }
+    }
 
     // ドリルバッテリー表示 (バーで可視化)
     const displayDrill = Math.max(0, state.drillUses);
@@ -96,17 +146,33 @@ export const updateDOM = (state: GameState, currentFrame: number) => {
     }
 };
 
-export const setupDOMEvents = (state: GameState) => {
+export const setupDOMEvents = (state: GameState, startGameCallback: () => void) => {
+    els.btnStart.addEventListener('click', () => {
+        if (state.gameState === STATE.TITLE) {
+            startGameCallback();
+        }
+    });
+
+    els.btnRetry.addEventListener('click', () => {
+        if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
+            state.gameState = STATE.TITLE;
+            state.gameCleared = false; // フラグもリセット
+        }
+    });
+
     els.btnDrill.addEventListener('click', () => {
+        els.btnDrill.blur();
         if (state.gameState === STATE.PLAY) state.gameState = STATE.DRILL;
         else if (state.gameState === STATE.DRILL) state.gameState = STATE.PLAY;
     });
 
     els.btnShopDrill.addEventListener('click', () => {
+        els.btnDrill.blur();
         if (state.money >= 100) { state.money -= 100; state.drillUses += 3; }
     });
 
     els.btnShopTnt.addEventListener('click', () => {
+        els.btnDrill.blur();
         if (state.money >= 1000) { state.money -= 1000; state.tntAmmo = 3; state.gameState = STATE.TNT; }
     });
 };

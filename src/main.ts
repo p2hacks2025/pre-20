@@ -14,15 +14,13 @@ const sketch = (p: p5) => {
 	const assets: GameAssets = { bg: null, frame: null, tile: null };
 
 	p.setup = () => {
-		// キャンバスをウィンドウサイズで作成し、HTMLの#appの中に配置されるようにする
-		// (index.htmlのCSSで#appの位置は制御済み)
 		p.createCanvas(BOARD_W, BOARD_H);
 
 		// 次のブロック生成
 		generateNextPiece(state);
 
 		// HTML側のボタンイベント登録
-		setupDOMEvents(state);
+		setupDOMEvents(state, startGame);
 	};
 
 	p.draw = () => {
@@ -31,17 +29,18 @@ const sketch = (p: p5) => {
 
 		// 2. タイトル画面
 		if (state.gameState === STATE.TITLE) {
-			p.fill(255);
-			p.textAlign(p.CENTER, p.CENTER);
-			p.textSize(32);
-			p.textStyle(p.BOLD);
-			p.stroke(0);
-			p.strokeWeight(4);
-			p.text("GOOOOOOOLden Tetris", BOARD_W / 2, BOARD_H / 2 - 20);
-			p.textSize(16);
-			p.strokeWeight(0);
-			p.text("Press ENTER to Start", BOARD_W / 2, BOARD_H / 2 + 50);
-			return; // タイトル時はここで終了
+			state.gameStartFrame = p.frameCount;
+			// p.fill(255);
+			// p.textAlign(p.CENTER, p.CENTER);
+			// p.textSize(32);
+			// p.textStyle(p.BOLD);
+			// p.stroke(0);
+			// p.strokeWeight(4);
+			// p.text("GOOOOOOOLden Tetris", BOARD_W / 2, BOARD_H / 2 - 20);
+			// p.textSize(16);
+			// p.strokeWeight(0);
+			// p.text("Press ENTER to Start", BOARD_W / 2, BOARD_H / 2 + 50);
+			// return; // タイトル時はここで終了
 		}
 
 		// 3. ゲームロジック更新
@@ -54,8 +53,7 @@ const sketch = (p: p5) => {
 				state.gameState = STATE.GAMEOVER;
 			}
 			updateGameLogic();
-		}
-		else if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
+		} else if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
 			if (state.fadeAlpha < 200) state.fadeAlpha += 2;
 			if (state.gameOverTextY > BOARD_H / 2) state.gameOverTextY -= 1;
 		}
@@ -74,10 +72,10 @@ const sketch = (p: p5) => {
 			drawInteractionOverlay(p, state, gridX, gridY);
 		}
 
-		// 5. ゲームオーバー演出 (画面全体)
+		// 5. ゲームオーバー
 		drawGameOverAnimation(p, state);
 
-		// 6. HTML UIの更新 (5フレームに1回くらいで十分だが、軽量なので毎回呼んでもOK)
+		// 6. HTML UIの更新
 		updateDOM(state, p.frameCount);
 	};
 
