@@ -12,6 +12,11 @@ export interface GameState {
     currentY: number;
     currentBlockTypes: number[];
 
+    // ホールド
+    holdMinoType: MinoType | null;
+    holdBlockTypes: number[];
+    canHold: boolean;
+
     // 次のブロック
     nextShape: number[][];
     nextMinoType: MinoType;
