@@ -29,6 +29,9 @@ export const createInitialState = (): GameState => ({
     gameCleared: false,
     dropInterval: 60,
     timeLimitSec: 90,
+
+    fadeAlpha: 0,
+    gameOverTextY: 360,
 });
 
 export const resetGame = (state: GameState, currentFrame: number): void => {
@@ -47,4 +50,6 @@ export const resetGame = (state: GameState, currentFrame: number): void => {
     state.gameState = STATE.PLAY;
     state.gameStartFrame = currentFrame;
     state.gameCleared = false;
+    state.fadeAlpha = 0;
+    state.gameOverTextY = 300;
 };

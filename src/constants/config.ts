@@ -2,11 +2,9 @@ export const COLS = 10;
 export const ROWS = 20;
 export const BLOCK_SIZE = 30;
 
-export const LEFT_UI_WIDTH = 150;
-export const UI_WIDTH = 250;
-
-export const WINDOW_W = LEFT_UI_WIDTH + (COLS * BLOCK_SIZE) + UI_WIDTH;
-export const WINDOW_H = ROWS * BLOCK_SIZE;
+// 盤面自体のサイズ
+export const BOARD_W = COLS * BLOCK_SIZE;
+export const BOARD_H = ROWS * BLOCK_SIZE;
 
 // ブロックタイプ
 export const TYPE = {
@@ -79,7 +77,7 @@ export const MINO_COLORS: Record<MinoType, string> = {
 };
 
 // UIボタン位置
-export const BTN_LAYOUT = {
-    DRILL: { x: 0, y: 300, w: 210, h: 50 },
-    MONEY: { x: 0, y: 380, w: 210, h: 50 }
-};
+// export const BTN_LAYOUT = {
+//     DRILL: { x: WINDOW_W - 250, y: 500, w: 210, h: 50 },
+//     MONEY: { x: WINDOW_W - 250, y: 630, w: 210, h: 50 }
+// };
