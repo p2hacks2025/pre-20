@@ -1,5 +1,5 @@
 import type { GameState } from '../types';
-import { MINO_SHAPES, MINO_COLORS, TYPE, STATE } from '../constants/config';
+import { MINO_SHAPES, MINO_COLORS, STATE } from '../constants/config';
 
 // DOM要素の参照をキャッシュ
 const els = {

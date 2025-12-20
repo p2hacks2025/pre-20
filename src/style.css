@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
 @theme {
-    /* ここでフォントを定義します */
     --font-pixel: "DotGothic16", sans-serif;
 }
