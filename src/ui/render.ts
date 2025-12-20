@@ -37,7 +37,7 @@ const drawSingleBlock = (p: p5, x: number, y: number, type: number, colorArg: st
         p.fill(0, 0, 0, 30);
         p.rect(x, y + BLOCK_SIZE - 5, BLOCK_SIZE, 5);
     }
-    p.stroke(0); // 枠線戻す
+    p.stroke(0);
 };
 
 // グリッド描画
@@ -47,7 +47,6 @@ export const drawGrid = (p: p5, state: GameState): void => {
     p.noStroke();
     p.rect(0, 0, COLS * BLOCK_SIZE, ROWS * BLOCK_SIZE);
 
-    // 枠線
     p.stroke(50);
     p.strokeWeight(1);
     for (let i = 0; i <= COLS; i++) p.line(i * BLOCK_SIZE, 0, i * BLOCK_SIZE, ROWS * BLOCK_SIZE);
@@ -128,7 +127,7 @@ export const drawGameOverAnimation = (p: p5, state: GameState) => {
     if (state.gameState !== 2 && !state.gameCleared) return;
 
     p.push();
-    p.resetMatrix(); // 座標変換を解除して画面全体を覆う
+    p.resetMatrix();
 
     // 暗転
     p.noStroke();
