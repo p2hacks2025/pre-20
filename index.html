@@ -5,12 +5,93 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tetris??????</title>
+  <title>GOOOOOOOLden Tetris</title>
 </head>
 
-<body class="bg-gray-900 flex items-center justify-center h-screen w-screen">
+<body
+  class="bg-[url('/background.jpg')] bg-cover bg-center overflow-hidden h-screen w-screen text-white select-none font-sans">
 
-  <div id="app" class="w-full h-full flex items-center justify-center"></div>
+  <div id="app" class="fixed inset-0 z-0 flex items-center justify-center"></div>
+
+  <div class="relative z-10 w-full h-full max-w-7xl mx-auto px-4 py-6 grid grid-cols-12 gap-4 pointer-events-none">
+
+    <div class="col-span-3 flex flex-col justify-between h-full pointer-events-auto">
+
+      <div class="flex flex-col gap-4">
+        <div class="bg-black/80 p-5 rounded-2xl border-2 border-white/20 shadow-xl backdrop-blur-md">
+          <div class="text-xs text-gray-400 font-bold tracking-widest mb-1">SCORE</div>
+          <div id="ui-score" class="text-4xl text-yellow-400 font-mono font-bold text-right tracking-tighter">0</div>
+        </div>
+        <div class="bg-black/80 p-5 rounded-2xl border-2 border-white/20 shadow-xl backdrop-blur-md">
+          <div class="text-xs text-gray-400 font-bold tracking-widest mb-1">TIME</div>
+          <div id="ui-time" class="text-5xl text-white font-mono font-bold text-right tracking-tighter">90</div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <button id="btn-drill"
+          class="group relative w-full aspect-video bg-linear-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white rounded-2xl shadow-2xl border-b-8 border-red-950 active:border-b-0 active:translate-y-2 transition-all overflow-hidden">
+          <div class="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay"></div>
+          <div class="relative z-10 flex flex-col items-center justify-center h-full">
+            <span
+              class="text-2xl font-black italic tracking-wider group-hover:scale-110 transition-transform">ACTIVATE<br>DRILL</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="bg-black/80 p-5 rounded-2xl border-2 border-white/20 shadow-xl backdrop-blur-md">
+        <div class="text-xs text-gray-400 font-bold tracking-widest mb-2">DRILL BATTERY</div>
+        <div class="flex items-center gap-2 bg-gray-900 p-2 rounded-lg border border-gray-700">
+          <div id="ui-drill-bar" class="flex gap-1 flex-1 h-8">
+          </div>
+          <span id="ui-drill-text" class="text-xl font-mono font-bold">5</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-span-6 flex items-center justify-center pointer-events-none">
+    </div>
+
+    <div class="col-span-3 flex flex-col justify-between h-full pointer-events-auto">
+
+      <div
+        class="bg-black/80 p-5 rounded-2xl border-2 border-white/20 shadow-xl backdrop-blur-md flex flex-col items-center min-h-45">
+        <div class="text-xs text-gray-400 font-bold tracking-widest w-full text-left mb-4">NEXT</div>
+        <div id="ui-next" class="grid grid-cols-4 gap-1 w-24 h-24"></div>
+      </div>
+
+      <div
+        class="bg-black/80 p-5 rounded-2xl border-2 border-white/20 shadow-xl backdrop-blur-md flex flex-col items-center min-h-45">
+        <div class="text-xs text-gray-400 font-bold tracking-widest w-full text-left mb-4">HOLD <span
+            class="text-[10px] opacity-50">(SHIFT)</span></div>
+        <div id="ui-hold" class="grid grid-cols-4 gap-1 w-24 h-24"></div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <div class="bg-black/80 p-5 rounded-2xl border-2 border-white/20 shadow-xl backdrop-blur-md">
+          <div class="text-xs text-gray-400 font-bold tracking-widest mb-1">MONEY</div>
+          <div class="flex items-baseline justify-end gap-2">
+            <span id="ui-money" class="text-4xl text-yellow-400 font-mono font-bold">0</span>
+            <span class="text-sm text-gray-300">YEN</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button id="btn-shop-drill"
+            class="bg-yellow-700 hover:bg-yellow-600 text-white p-2 rounded-lg text-xs font-bold border-b-4 border-yellow-900 active:border-b-0 active:translate-y-1 transition-all">
+            BUY DRILL<br><span class="text-yellow-200">100 YEN</span>
+          </button>
+          <button id="btn-shop-tnt"
+            class="bg-orange-700 hover:bg-orange-600 text-white p-2 rounded-lg text-xs font-bold border-b-4 border-orange-900 active:border-b-0 active:translate-y-1 transition-all">
+            BUY TNT<br><span class="text-orange-200">1000 YEN</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
 
   <script type="module" src="/src/main.ts"></script>
 </body>

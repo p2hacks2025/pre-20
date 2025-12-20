@@ -1,63 +1,84 @@
+import './style.css'
 import p5 from 'p5';
-import { WINDOW_W, WINDOW_H, COLS, BLOCK_SIZE, ROWS, STATE, BTN_LAYOUT, LEFT_UI_WIDTH } from './constants/config';
+import { COLS, BLOCK_SIZE, ROWS, STATE, BOARD_W, BOARD_H } from './constants/config';
 import { createInitialState, resetGame } from './store/state';
 import { spawnPiece, canMove, rotateShape, lockPiece, generateNextPiece, useDrill, rowHasGold, useTNT, isRowFull, holdPiece } from './core/logic';
-import { initButtonPositions, drawTitle, drawGrid, drawGhost, drawCurrentPiece, drawDrillOverlay, drawTNTOverlay, drawGameOver, drawUI, drawHold } from './ui/render';
+import { drawGrid, drawGhost, drawCurrentPiece, drawInteractionOverlay, drawGameOverAnimation } from './ui/render';
+import { updateDOM, setupDOMEvents } from './ui/dom';
+import type { GameAssets } from './types';
+
+(p5 as any).disableFriendlyErrors = true;
 
 const sketch = (p: p5) => {
 	const state = createInitialState();
+	const assets: GameAssets = { bg: null, frame: null, tile: null };
 
 	p.setup = () => {
-		p.createCanvas(WINDOW_W, WINDOW_H);
-		initButtonPositions(p);
+		// キャンバスをウィンドウサイズで作成し、HTMLの#appの中に配置されるようにする
+		// (index.htmlのCSSで#appの位置は制御済み)
+		p.createCanvas(BOARD_W, BOARD_H);
+
+		// 次のブロック生成
 		generateNextPiece(state);
+
+		// HTML側のボタンイベント登録
+		setupDOMEvents(state);
 	};
 
 	p.draw = () => {
-		p.background(20);
+		// 1. 画面クリア（透明にする）
+		p.clear();
 
+		// 2. タイトル画面
 		if (state.gameState === STATE.TITLE) {
-			drawTitle(p);
-			return;
+			p.fill(255);
+			p.textAlign(p.CENTER, p.CENTER);
+			p.textSize(32);
+			p.textStyle(p.BOLD);
+			p.stroke(0);
+			p.strokeWeight(4);
+			p.text("GOOOOOOOLden Tetris", BOARD_W / 2, BOARD_H / 2 - 20);
+			p.textSize(16);
+			p.strokeWeight(0);
+			p.text("Press ENTER to Start", BOARD_W / 2, BOARD_H / 2 + 50);
+			return; // タイトル時はここで終了
 		}
 
+		// 3. ゲームロジック更新
 		if (state.gameState === STATE.PLAY) {
 			const elapsedSec = Math.floor((p.frameCount - state.gameStartFrame) / 60);
 			const remainingSec = state.timeLimitSec - elapsedSec;
+
 			if (remainingSec <= 0) {
 				if (state.score >= 800) state.gameCleared = true;
 				state.gameState = STATE.GAMEOVER;
 			}
+			updateGameLogic();
 		}
-
-		drawHold(p, state);
-
-		p.push();
-		p.translate(LEFT_UI_WIDTH, 0);
-
-		p.stroke(100);
-		p.line(0, 0, 0, p.height);
-		p.line(COLS * BLOCK_SIZE, 0, COLS * BLOCK_SIZE, p.height);
+		else if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
+			if (state.fadeAlpha < 200) state.fadeAlpha += 2;
+			if (state.gameOverTextY > BOARD_H / 2) state.gameOverTextY -= 1;
+		}
 
 		drawGrid(p, state);
 
 		if (state.gameState === STATE.PLAY) {
 			drawGhost(p, state);
 			drawCurrentPiece(p, state);
-			updateGameLogic();
 		} else if (state.gameState === STATE.DRILL || state.gameState === STATE.TNT) {
 			drawCurrentPiece(p, state);
-			if (state.gameState === STATE.DRILL) drawDrillOverlay(p, state);
-			else drawTNTOverlay(p, state);
-		} else if (state.gameState === STATE.GAMEOVER) {
-			drawGameOver(p, state);
+
+			// マウス位置の計算
+			const gridX = Math.floor(p.mouseX / BLOCK_SIZE);
+			const gridY = Math.floor(p.mouseY / BLOCK_SIZE);
+			drawInteractionOverlay(p, state, gridX, gridY);
 		}
 
-		p.pop();
+		// 5. ゲームオーバー演出 (画面全体)
+		drawGameOverAnimation(p, state);
 
-		if (state.gameState !== STATE.GAMEOVER) {
-			drawUI(p, state);
-		}
+		// 6. HTML UIの更新 (5フレームに1回くらいで十分だが、軽量なので毎回呼んでもOK)
+		updateDOM(state, p.frameCount);
 	};
 
 	const updateGameLogic = () => {
@@ -74,7 +95,6 @@ const sketch = (p: p5) => {
 		}
 	};
 
-	// 移動関数
 	const tryMove = (dx: number, dy: number): boolean => {
 		if (canMove(state, state.currentX + dx, state.currentY + dy, state.currentShape)) {
 			state.currentX += dx;
@@ -84,21 +104,18 @@ const sketch = (p: p5) => {
 		return false;
 	};
 
-	// ハードドロップ
 	const executeHardDrop = () => {
-		while (tryMove(0, 1)) {
-			// 地面につくまで
-		}
+		while (tryMove(0, 1)) { }
 		lockPiece(state);
 		spawnPiece(state);
 	};
 
-	// ゲーム開始処理
 	const startGame = () => {
 		resetGame(state, p.frameCount);
 		spawnPiece(state);
 	};
 
+	// キー入力
 	p.keyPressed = () => {
 		switch (state.gameState) {
 			case STATE.TITLE:
@@ -108,55 +125,30 @@ const sketch = (p: p5) => {
 				if (p.key === 'Enter') state.gameState = STATE.TITLE;
 				break;
 			case STATE.PLAY:
-				handlePlayInput();
+				if (p.key === 'ArrowLeft') tryMove(-1, 0);
+				else if (p.key === 'ArrowRight') tryMove(1, 0);
+				else if (p.key === 'ArrowDown') tryMove(0, 1);
+				else if (p.key === 'ArrowUp') rotateShape(state);
+				else if (p.key === ' ') executeHardDrop();
+				else if (p.key === 'Shift') holdPiece(state);
 				break;
 		}
 	};
 
-	// プレイ中の入力処理を分離
-	const handlePlayInput = () => {
-		switch (p.key) {
-			case 'ArrowLeft':
-				tryMove(-1, 0);
-				break;
-			case 'ArrowRight':
-				tryMove(1, 0);
-				break;
-			case 'ArrowDown':
-				tryMove(0, 1);
-				break;
-			case 'ArrowUp':
-				rotateShape(state);
-				break;
-			case ' ':
-				executeHardDrop();
-				break;
-			case 'Shift':
-				holdPiece(state);
-				break;
-		}
-	};
-
+	// マウス入力 (ドリル/TNTの発火のみ担当)
+	// UIボタンのクリックはdom.tsで処理される
 	p.mousePressed = () => {
-		if (p.mouseX >= BTN_LAYOUT.DRILL.x && p.mouseX <= BTN_LAYOUT.DRILL.x + BTN_LAYOUT.DRILL.w &&
-			p.mouseY >= BTN_LAYOUT.DRILL.y && p.mouseY <= BTN_LAYOUT.DRILL.y + BTN_LAYOUT.DRILL.h) {
-			state.gameState = (state.gameState === STATE.DRILL) ? STATE.PLAY : STATE.DRILL;
-		}
-		else if (p.mouseX >= BTN_LAYOUT.MONEY.x && p.mouseX <= BTN_LAYOUT.MONEY.x + BTN_LAYOUT.MONEY.w &&
-			p.mouseY >= BTN_LAYOUT.MONEY.y && p.mouseY <= BTN_LAYOUT.MONEY.y + BTN_LAYOUT.MONEY.h) {
-			if (state.money >= 1000) { state.money -= 1000; state.tntAmmo = 3; state.gameState = STATE.TNT; }
-			else if (state.money >= 100) { state.money -= 100; state.drillUses += 3; }
-		}
+		// 盤面内のクリックか判定
+		const gridX = Math.floor(p.mouseX / BLOCK_SIZE);
+		const gridY = Math.floor(p.mouseY / BLOCK_SIZE);
+		const isValidGrid = gridX >= 0 && gridX < COLS && gridY >= 0 && gridY < ROWS;
 
-		const gridMouseX = p.mouseX - LEFT_UI_WIDTH;
-		const my = Math.floor(p.mouseY / BLOCK_SIZE);
-
-		if (gridMouseX >= 0 && gridMouseX < COLS * BLOCK_SIZE && my >= 0 && my < ROWS && isRowFull(state, my)) {
-			if (state.gameState === STATE.DRILL) useDrill(state, my);
-			else if (state.gameState === STATE.TNT && !rowHasGold(state, my)) useTNT(state, my);
+		if (isValidGrid && isRowFull(state, gridY)) {
+			if (state.gameState === STATE.DRILL) useDrill(state, gridY);
+			else if (state.gameState === STATE.TNT && !rowHasGold(state, gridY)) useTNT(state, gridY);
 		}
 	};
 };
 
-// p5インスタンスの作成（第2引数にDOM要素を渡す）
+// p5インスタンス作成
 new p5(sketch, document.getElementById('app')!);
