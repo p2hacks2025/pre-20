@@ -31,6 +31,7 @@ const els = {
 // ブロック描画ヘルパー
 const renderMinoToHTML = (container: HTMLElement, shape: number[][], color: string, blockTypes: number[]) => {
     container.innerHTML = '';
+    if (!shape || shape.length === 0) return;
 
     const width = shape[0].length;
     const height = shape.length;
@@ -69,7 +70,7 @@ export const updateDOM = (state: GameState, currentFrame: number) => {
 
         // メッセージと色を出し分け
         if (state.gameCleared) {
-            els.goMessage.innerHTML = "NIGHT<br>CLEAR!";
+            els.goMessage.innerHTML = "WELL DONE!";
             els.goMessage.className = "text-4xl font-black italic tracking-tighter mb-4 drop-shadow-lg text-center leading-tight text-transparent bg-clip-text bg-gradient-to-br from-cyan-300 to-blue-500";
         } else {
             els.goMessage.innerHTML = "GAME<br>OVER";
