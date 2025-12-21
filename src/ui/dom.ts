@@ -29,7 +29,7 @@ const els = {
 };
 
 // ブロック描画ヘルパー
-const renderMinoToHTML = (container: HTMLElement, shape: number[][], color: string, blockTypes: number[]) => {
+const renderMinoToHTML = (container: HTMLElement, shape: number[][], color: string, _holdBlockTypes?: number[]) => {
     container.innerHTML = '';
     if (!shape || shape.length === 0) return;
 
