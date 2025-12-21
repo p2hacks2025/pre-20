@@ -11,10 +11,20 @@ import type { GameAssets } from './types';
 
 const sketch = (p: p5) => {
 	const state = createInitialState();
-	const assets: GameAssets = { bg: null, frame: null, tile: null };
+	const assets: GameAssets = { bg: null, frame: null, tile: null, normalBlockTexture: null };
+
+	const bgm = new Audio('/8bit-maou-kessen.mp3');
+	bgm.loop = true;   // ループ再生を有効にする
+	bgm.volume = 0.3;  // 音量設定 (0.0 〜 1.0) ※大きすぎないように注意
+
+	(p as any).preload = () => {
+		// publicフォルダの画像を読み込み
+		assets.normalBlockTexture = p.loadImage('/maptile_ganpeki_gray.png');
+	};
 
 	p.setup = () => {
 		p.createCanvas(BOARD_W, BOARD_H);
+		// assets.normalBlockTexture = p.loadImage('/maptile_ganpeki_gray.png');
 
 		// 次のブロック生成
 		generateNextPiece(state);
@@ -30,6 +40,7 @@ const sketch = (p: p5) => {
 		// 2. タイトル画面
 		if (state.gameState === STATE.TITLE) {
 			state.gameStartFrame = p.frameCount;
+			updateDOM(state, p.frameCount);
 			// p.fill(255);
 			// p.textAlign(p.CENTER, p.CENTER);
 			// p.textSize(32);
@@ -40,8 +51,10 @@ const sketch = (p: p5) => {
 			// p.textSize(16);
 			// p.strokeWeight(0);
 			// p.text("Press ENTER to Start", BOARD_W / 2, BOARD_H / 2 + 50);
-			// return; // タイトル時はここで終了
+			return; // タイトル時はここで終了
 		}
+
+		drawGrid(p, state, assets);
 
 		// 3. ゲームロジック更新
 		if (state.gameState === STATE.PLAY) {
@@ -51,6 +64,7 @@ const sketch = (p: p5) => {
 			if (remainingSec <= 0) {
 				if (state.score >= 800) state.gameCleared = true;
 				state.gameState = STATE.GAMEOVER;
+				bgm.pause();
 			}
 			updateGameLogic();
 		} else if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
@@ -58,13 +72,11 @@ const sketch = (p: p5) => {
 			if (state.gameOverTextY > BOARD_H / 2) state.gameOverTextY -= 1;
 		}
 
-		drawGrid(p, state);
-
 		if (state.gameState === STATE.PLAY) {
 			drawGhost(p, state);
-			drawCurrentPiece(p, state);
+			drawCurrentPiece(p, state, assets);
 		} else if (state.gameState === STATE.DRILL || state.gameState === STATE.TNT) {
-			drawCurrentPiece(p, state);
+			drawCurrentPiece(p, state, assets);
 
 			// マウス位置の計算
 			const gridX = Math.floor(p.mouseX / BLOCK_SIZE);
@@ -72,10 +84,14 @@ const sketch = (p: p5) => {
 			drawInteractionOverlay(p, state, gridX, gridY);
 		}
 
-		// 5. ゲームオーバー
+		if (state.gameState === STATE.GAMEOVER || state.gameCleared) {
+			if (!bgm.paused) {
+				bgm.pause();
+			}
+		}
+
 		drawGameOverAnimation(p, state);
 
-		// 6. HTML UIの更新
 		updateDOM(state, p.frameCount);
 	};
 
@@ -111,6 +127,8 @@ const sketch = (p: p5) => {
 	const startGame = () => {
 		resetGame(state, p.frameCount);
 		spawnPiece(state);
+		bgm.currentTime = 0;
+		bgm.play().catch(e => console.log("BGM Play Error:", e));
 	};
 
 	// キー入力

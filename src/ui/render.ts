@@ -1,10 +1,23 @@
 import p5 from 'p5';
-import type { GameState } from '../types';
+import type { GameAssets, GameState } from '../types';
 import { COLS, ROWS, BLOCK_SIZE, TYPE, MINO_COLORS, STATE, BOARD_W, BOARD_H } from '../constants/config';
 import { canMove, isRowFull, rowHasGold, rowHasPlatinum } from '../core/logic';
 
 // 単体ブロック描画
-const drawSingleBlock = (p: p5, x: number, y: number, type: number, colorArg: string): void => {
+const drawSingleBlock = (p: p5, x: number, y: number, type: number, colorArg: string, texture?: any): void => {
+    if (type === TYPE.NORMAL && texture && texture.width > 1) {
+        p.push();
+        p.tint(colorArg); // グレースケール画像をブロックの色で着色
+        p.image(texture, x, y, BLOCK_SIZE, BLOCK_SIZE);
+        p.pop();
+
+        // 枠線をうっすら描くとブロックの境界がわかりやすくなります
+        p.noFill();
+        p.stroke(0, 50);
+        p.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+        return;
+    }
+
     p.stroke(0, 50);
     p.strokeWeight(1);
 
@@ -41,7 +54,7 @@ const drawSingleBlock = (p: p5, x: number, y: number, type: number, colorArg: st
 };
 
 // グリッド描画
-export const drawGrid = (p: p5, state: GameState): void => {
+export const drawGrid = (p: p5, state: GameState, assets: GameAssets): void => {
     // 盤面の背景（半透明の黒）
     p.fill(0, 0, 0, 200);
     p.noStroke();
@@ -55,14 +68,14 @@ export const drawGrid = (p: p5, state: GameState): void => {
     state.grid.forEach((row, y) => {
         row.forEach((type, x) => {
             if (type !== 0) {
-                drawSingleBlock(p, x * BLOCK_SIZE, y * BLOCK_SIZE, type, state.colorGrid[y][x]);
+                drawSingleBlock(p, x * BLOCK_SIZE, y * BLOCK_SIZE, type, state.colorGrid[y][x], assets.normalBlockTexture);
             }
         });
     });
 };
 
 // 操作ブロック描画
-export const drawCurrentPiece = (p: p5, state: GameState): void => {
+export const drawCurrentPiece = (p: p5, state: GameState, assets: GameAssets): void => {
     const colorCode = MINO_COLORS[state.currentMinoType];
     let counter = 0;
 
@@ -70,7 +83,7 @@ export const drawCurrentPiece = (p: p5, state: GameState): void => {
         row.forEach((cell, j) => {
             if (cell !== 0 && counter < 4) {
                 const type = state.currentBlockTypes[counter];
-                drawSingleBlock(p, (state.currentX + j) * BLOCK_SIZE, (state.currentY + i) * BLOCK_SIZE, type, colorCode);
+                drawSingleBlock(p, (state.currentX + j) * BLOCK_SIZE, (state.currentY + i) * BLOCK_SIZE, type, colorCode, assets.normalBlockTexture);
                 counter++;
             }
         });
@@ -142,7 +155,7 @@ export const drawGameOverAnimation = (p: p5, state: GameState) => {
 
         if (state.gameCleared) {
             p.fill(0, 255, 255);
-            p.text("NIGHT CLEAR!", BOARD_W / 2, state.gameOverTextY);
+            p.text("WELL DONE!", BOARD_W / 2, state.gameOverTextY);
         } else {
             p.fill(255, 50, 50);
             p.text("GAME OVER", BOARD_W / 2, state.gameOverTextY);

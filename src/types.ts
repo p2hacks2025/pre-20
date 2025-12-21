@@ -4,6 +4,7 @@ export interface GameAssets {
     bg: any;
     frame: any;
     tile: any;
+    normalBlockTexture: any;
 }
 
 export interface GameState {
